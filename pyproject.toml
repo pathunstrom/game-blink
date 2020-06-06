@@ -1,0 +1,33 @@
+[tool.briefcase]
+project_name = "Blink"
+bundle = "dev.thunstrom.piper"
+version = "0.0.1"
+url = "https://piper.thunstrom.dev/blink"
+license = "Other"
+author = 'Piper Thunstrom'
+author_email = "pathunstrom@gmail.com"
+
+[tool.briefcase.app.blink]
+formal_name = "Blink"
+description = "A tiny emergent behavior toy."
+icon = "src/blink/resources/blink"
+sources = ['src/blink']
+requires = ['ppb==0.9.0b1']
+
+
+[tool.briefcase.app.blink.macOS]
+requires = []
+
+[tool.briefcase.app.blink.linux]
+requires = []
+system_requires = []
+
+[tool.briefcase.app.blink.windows]
+requires = []
+
+# Mobile deployments
+[tool.briefcase.app.blink.iOS]
+requires = []
+
+[tool.briefcase.app.blink.android]
+requires = []

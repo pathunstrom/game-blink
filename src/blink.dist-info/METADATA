@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: blink
+Formal-Name: Blink
+App-ID: dev.thunstrom.piper.blink
+Version: 0.0.1
+Home-page: https://piper.thunstrom.dev/blink
+Author: Piper Thunstrom
+Author-email: pathunstrom@gmail.com
+Summary: A tiny emergent behavior toy.
