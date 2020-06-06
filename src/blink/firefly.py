@@ -41,19 +41,22 @@ class Firefly(ppb.Sprite):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.urge = randint(0, 35)
+        self.intialize_urge()
 
     def on_update(self, event, signal):
         self.urge += _urge_increase(self.urge_increase)
         if self.urge >= self.max_urge:
             event.scene.add(Light(position=self.position))
             signal(Blink(self))
-            self.urge -= self.max_urge
+            self.intialize_urge()
 
     def on_blink(self, event, signal):
         distance = (self.position - event.source.position).length
-        if distance <= LIGHT_RADIUS:
+        if event.source is not self and distance <= LIGHT_RADIUS:
             self.urge += sum(_urge_increase(self.urge_increase) for _ in range(URGE_MULTIPLIER))
+
+    def intialize_urge(self):
+        self.urge = randint(0, 55)
 
 
 class Light(ppb.Sprite):
