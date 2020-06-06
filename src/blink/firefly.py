@@ -1,8 +1,17 @@
-
+from dataclasses import dataclass
 from random import randint
 
 import ppb
 from ppb.features import animation
+
+
+LIGHT_RADIUS = 2.5
+URGE_MULTIPLIER = 30
+
+
+@dataclass
+class Blink:
+    source: 'Firefly'
 
 
 def _one():
@@ -38,13 +47,19 @@ class Firefly(ppb.Sprite):
         self.urge += _urge_increase(self.urge_increase)
         if self.urge >= self.max_urge:
             event.scene.add(Light(position=self.position))
+            signal(Blink(self))
             self.urge -= self.max_urge
+
+    def on_blink(self, event, signal):
+        distance = (self.position - event.source.position).length
+        if distance <= LIGHT_RADIUS:
+            self.urge += sum(_urge_increase(self.urge_increase) for _ in range(URGE_MULTIPLIER))
 
 
 class Light(ppb.Sprite):
     image = ppb.Circle(246, 255, 77)
     _opacity = 0.3
-    size = 4
+    size = LIGHT_RADIUS * 2
     parent = None
 
     def on_update(self, event, signal):
