@@ -9,7 +9,7 @@ from ppb.features import animation
 
 
 LIGHT_RADIUS = 2.5
-URGE_MULTIPLIER = 30
+URGE_MULTIPLIER = 6
 
 
 @dataclass
@@ -40,6 +40,13 @@ def _urge_increase(key="one"):
     return _urge_increase_functions[key]()
 
 
+class MousePosition(ppb.Sprite):
+    image = None
+
+    def on_mouse_motion(self, event, signal):
+        self.position = event.position
+
+
 class Firefly(ppb.Sprite):
     size = 0.5
     image = animation.Animation("blink/resources/firefly/{0..5}.png", 30)
@@ -52,6 +59,9 @@ class Firefly(ppb.Sprite):
     basis = ppb.Vector(0, 1)
     layer = 3
     _wall_buffer = 2
+    _others_buffer = 4
+    _flocking_distance = 10
+    _mouse_buffer = 4
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -68,6 +78,17 @@ class Firefly(ppb.Sprite):
         forces: List[Force] = []
         self.wander(forces)
         self.avoid_walls(forces, event.scene.main_camera)
+
+        others = set(event.scene.get(kind=Firefly))
+        others.remove(self)
+        self.avoid_others(forces, others)
+        self.seek_others(forces, others)
+
+        mouse = next(event.scene.get(kind=MousePosition))
+        avoid_mouse = self.flee_if_near(mouse.position, self._mouse_buffer)
+        if avoid_mouse:
+            forces.append(Force(avoid_mouse, 3))
+
         force_vector = ppb.Vector(0, 0)
         weights = 0
         for force in forces:
@@ -111,15 +132,49 @@ class Firefly(ppb.Sprite):
         if necessary_force:
             forces.append(Force(necessary_force, necessary_weight))
 
+    def avoid_others(self, forces, others):
+        positions = []
+        local_center = self.position
+        for other in others:
+            if (self.position - other.position).length < self._others_buffer:
+                positions.append(other.position)
+        if positions:
+            local_center = sum(positions, ppb.Vector(0, 0)) / len(positions)
+        forces.append(
+            Force(
+                self.flee(local_center),
+                self._others_buffer - (local_center - self.position).length * 2
+            )
+        )
+
+    def seek_others(self, forces, others):
+        positions = [self.position]
+        for other in others:
+            if (self.position - other.position).length <= self._flocking_distance:
+                positions.append(other.position)
+        local_center = sum(positions, ppb.Vector(0, 0)) / len(positions)
+        forces.append(Force(self.seek(local_center), 1))
+
     def flee(self, point):
-        desired_velocity = (self.position - point).scale_to(self.max_velocity)
+        desired_direction = (self.position - point)
+        desired_velocity = self.velocity
+        if desired_direction:
+            desired_velocity = (self.position - point).scale_to(self.max_velocity)
         steering = desired_velocity - self.velocity
         return steering
 
     def seek(self, point):
-        desired_velocity = (point - self.position).scale_to(self.max_velocity)
+        desired_velocity = self.velocity
+        desired_direction = (self.position - point)
+        if desired_direction:
+            desired_velocity = (point - self.position).scale_to(self.max_velocity)
         steering = desired_velocity - self.velocity
         return steering
+
+    def flee_if_near(self, point, distance):
+        if (self.position - point).length <= distance:
+            return self.flee(point)
+        return ppb.Vector(0, 0)
 
 
 class Light(ppb.Sprite):
