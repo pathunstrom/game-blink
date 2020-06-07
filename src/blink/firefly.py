@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from random import randint
+from random import uniform
 from typing import List, NamedTuple
 
 
@@ -47,9 +48,10 @@ class Firefly(ppb.Sprite):
     max_urge = 100
     velocity: ppb.Vector = ppb.Vector(0, 1)
     max_velocity = 0.75
-    max_steering_force = 3
     wander_vector: ppb.Vector
     basis = ppb.Vector(0, 1)
+    layer = 3
+    _wall_buffer = 2
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -86,36 +88,38 @@ class Firefly(ppb.Sprite):
         self.urge = randint(0, 55)
 
     def wander(self, forces):
-        self.wander_vector = self.wander_vector.rotate(randint(-5, 5))
+        self.wander_vector = self.wander_vector.rotate(uniform(-0.5, 0.5))
         steering_force = self.velocity.scale_to(2) + self.wander_vector
         forces.append(Force(steering_force, 1))
 
     def avoid_walls(self, forces, camera):
         necessary_force = ppb.Vector(0, 0)
-        necessary_weight = 1
+        necessary_weight = 0
 
-        left_distance = self.position.x - camera.left
-        if left_distance <= 2:
-            necessary_force += ppb.Vector(1 * (3 - left_distance), 0)
-            necessary_weight = max(necessary_weight, 3 - left_distance)
+        points = (
+            ppb.Vector(camera.left, self.position.y),
+            ppb.Vector(camera.right, self.position.y),
+            ppb.Vector(self.position.x, camera.top),
+            ppb.Vector(self.position.x, camera.bottom)
+        )
 
-        right_distance = camera.right - self.position.x
-        if right_distance <= 2:
-            necessary_force += ppb.Vector(-1 * (3 - right_distance), 0)
-            necessary_weight = max(necessary_weight, 3 - right_distance)
-
-        top_distance = camera.top - self.position.y
-        if top_distance <= 2:
-            necessary_force += ppb.Vector(0, -1 * (3 - top_distance))
-            necessary_weight = max(necessary_weight, 3 - top_distance)
-
-        bottom_distance = self.position.y - camera.bottom
-        if bottom_distance <= 2:
-            necessary_force += ppb.Vector(0, 1 * (3 - bottom_distance))
-            necessary_weight = max(necessary_weight, 3 - bottom_distance)
+        for point in points:
+            if (point - self.position).length <= self._wall_buffer:
+                necessary_force += self.flee(point)
+                necessary_weight += 3
 
         if necessary_force:
             forces.append(Force(necessary_force, necessary_weight))
+
+    def flee(self, point):
+        desired_velocity = (self.position - point).scale_to(self.max_velocity)
+        steering = desired_velocity - self.velocity
+        return steering
+
+    def seek(self, point):
+        desired_velocity = (point - self.position).scale_to(self.max_velocity)
+        steering = desired_velocity - self.velocity
+        return steering
 
 
 class Light(ppb.Sprite):
@@ -123,6 +127,7 @@ class Light(ppb.Sprite):
     _opacity = 0.3
     size = LIGHT_RADIUS * 2
     parent = None
+    layer = 5
 
     def on_update(self, event, signal):
         self._opacity -= 0.025
