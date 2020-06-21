@@ -1,4 +1,3 @@
-from itertools import product
 from random import uniform
 
 import ppb
@@ -14,6 +13,16 @@ class Field(ppb.BaseScene):
         self.add(MousePosition())
         for _ in range(5):
             self.spawn_firefly()
+        foreground = ppb.RectangleSprite(
+            height=self.main_camera.height,
+            width=9.375,
+            image=ppb.Image("blink/resources/foreground-fronds.png"),
+            layer=10,
+            position = ppb.Vector(uniform((self.main_camera.width / -2) + 4.6875, (self.main_camera.width / 2) - 4.6875), 0)
+        )
+
+        self.add(foreground)
+        print(self.main_camera.height)
 
     def on_button_pressed(self, event, signal):
         if event.button is buttons.Secondary and len(list(self.get(kind=Firefly))) < 25:
