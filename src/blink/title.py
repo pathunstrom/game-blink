@@ -2,8 +2,13 @@ import ppb
 from ppb import keycodes as keys
 
 from blink.field import Field
+from blink.bgm import BackgroundMusic
+from blink.bgm import QueueBackgroundMusic
 
 __all__ = ["Title"]
+
+bgm_intro = BackgroundMusic("blink/resources/bgm_intro_amp.wav")
+bgm_loop = BackgroundMusic("blink/resources/bgm_loop_amp.wav", play_forever=True)
 
 
 class Title(ppb.BaseScene):
@@ -17,6 +22,10 @@ class Title(ppb.BaseScene):
             position=ppb.Vector(-6, 5.5)
         )
         self.add(title)
+
+    def on_scene_started(self, event, signal):
+        signal(QueueBackgroundMusic(bgm_intro))
+        signal(QueueBackgroundMusic(bgm_loop))
 
     def on_key_released(self, event, signal):
         if event.key is keys.Escape:

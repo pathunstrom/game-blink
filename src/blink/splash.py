@@ -15,7 +15,7 @@ text_opacity = int(255 * 0.8)
 
 class Splash(BaseScene):
     background_color = 106, 48, 147
-    run_time = 1
+    run_time = 2
 
     def __init__(self, *args, next_scene=None, **kwargs):
         super().__init__()
