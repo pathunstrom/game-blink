@@ -71,12 +71,10 @@ class BackgroundMusicController(SoundController):
         self.bgm_queue.append(event.background_music)
 
     def on_scene_started(self, event, signal):
-        print(MIX_MAX_VOLUME)
         mix_call(Mix_VolumeMusic, 255)
 
     def on_idle(self, event, signal):
         if not mix_call(Mix_PlayingMusic) and self.bgm_queue:
             _next: BackgroundMusic = self.bgm_queue.popleft()
-            print(_next)
             self.bgm_currently_playing = _next.load()
             mix_call(Mix_PlayMusic, self.bgm_currently_playing, _next.loops)

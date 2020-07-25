@@ -19,7 +19,6 @@ class Field(ppb.BaseScene):
         modifier = choice((0, sections - 1))  # Left side or right side
         normalized_position = uniform(0, 1)
         x_offset = normalized_position * section_width
-        print(f"Offset: {x_offset}")
         x_root = self.main_camera.left + (modifier * section_width)
         foreground = ppb.RectangleSprite(
             height=self.main_camera.height,
@@ -30,7 +29,6 @@ class Field(ppb.BaseScene):
         )
 
         self.add(foreground)
-        print(self.main_camera.height)
 
     def on_button_pressed(self, event, signal):
         if event.button is buttons.Secondary and len(list(self.get(kind=Firefly))) < 25:
