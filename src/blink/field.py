@@ -1,4 +1,4 @@
-from random import uniform
+from random import choice, uniform
 
 import ppb
 from ppb import buttons
@@ -13,12 +13,20 @@ class Field(ppb.BaseScene):
         self.add(MousePosition())
         for _ in range(5):
             self.spawn_firefly()
+
+        sections = 7
+        section_width = self.main_camera.width / sections
+        modifier = choice((0, sections - 1))  # Left side or right side
+        normalized_position = uniform(0, 1)
+        x_offset = normalized_position * section_width
+        print(f"Offset: {x_offset}")
+        x_root = self.main_camera.left + (modifier * section_width)
         foreground = ppb.RectangleSprite(
             height=self.main_camera.height,
             width=9.375,
             image=ppb.Image("blink/resources/foreground-fronds.png"),
             layer=10,
-            position = ppb.Vector(uniform((self.main_camera.width / -2) + 4.6875, (self.main_camera.width / 2) - 4.6875), 0)
+            position=ppb.Vector(x_root + x_offset, 0)
         )
 
         self.add(foreground)
