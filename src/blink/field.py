@@ -7,11 +7,12 @@ from blink.firefly import Firefly, MousePosition
 
 
 sound_wave = anim.Animation("blink/resources/sound-wave/{01..08}.png", frames_per_second=24)
-
+bg_fronds = ppb.Image(f"blink/resources/bg-fronds-small-1.png")
 FOREGROUND = 10
 CENTER_FRONT = 5
 CENTER = 0
 BACKGROUND = -10
+
 
 class Field(ppb.BaseScene):
     background_color = (30, 0, 75)
@@ -34,8 +35,20 @@ class Field(ppb.BaseScene):
             layer=FOREGROUND,
             position=ppb.Vector(x_root + x_offset, 0)
         )
-
         self.add(foreground)
+
+        x_position = self.main_camera.left + uniform(0, 4)
+        while x_position <= self.main_camera.right:
+            self.add(
+                ppb.RectangleSprite(
+                    image=bg_fronds,
+                    height=self.main_camera.height,
+                    width=1,
+                    layer=BACKGROUND,
+                    position=ppb.Vector(x_position, 0)
+                )
+            )
+            x_position += uniform(4, 8)
 
     def on_button_pressed(self, event: ppb.events.ButtonPressed, signal):
         if event.button is buttons.Secondary and len(list(self.get(kind=Firefly))) < 25:

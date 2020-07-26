@@ -20,5 +20,6 @@ def main():
             ppb.systems.EventPoller,
             BackgroundMusicController,
             assetlib.AssetLoadingSystem
-        )
+        ),
+        title="Blink"
     )
