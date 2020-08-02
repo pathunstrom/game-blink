@@ -8,10 +8,13 @@ from blink.firefly import Firefly, MousePosition
 
 sound_wave = anim.Animation("blink/resources/sound-wave/{01..08}.png", frames_per_second=24)
 bg_fronds = ppb.Image(f"blink/resources/bg-fronds-small-1.png")
+SECONDS_TO_FOCUS = 1
+CAMERA_SPEED = 25 / SECONDS_TO_FOCUS
 FOREGROUND = 10
 CENTER_FRONT = 5
 CENTER = 0
 BACKGROUND = -10
+DEEP_BACKGROUND = -100
 
 
 class Field(ppb.BaseScene):
@@ -27,7 +30,7 @@ class Field(ppb.BaseScene):
         modifier = choice((0, sections - 1))  # Left side or right side
         normalized_position = uniform(0, 1)
         x_offset = normalized_position * section_width
-        x_root = self.main_camera.left + (modifier * section_width)
+        x_root = self.main_camera.left + (modifier * section_width) + x_offset
         foreground = ppb.RectangleSprite(
             height=self.main_camera.height,
             width=9.375,
@@ -49,6 +52,50 @@ class Field(ppb.BaseScene):
                 )
             )
             x_position += uniform(4, 8)
+
+        self.add(
+            ppb.RectangleSprite(
+                image=ppb.Image("blink/resources/background.png"),
+                width=25,
+                layer=DEEP_BACKGROUND
+            )
+        )
+
+        self.add(
+            ppb.sprites.RectangleSprite(
+                image=ppb.Text("Blink", font=ppb.Font("blink/resources/strato-linked-webfont.ttf", size=72),
+                               color=(220, 235, 50)),
+                layer=FOREGROUND,
+                height=5,
+                position=ppb.Vector(-6-25, 5.5)
+            ),
+            ["cleanup"]
+        )
+
+        self.add(
+            ppb.RectangleSprite(
+                image=ppb.Image("src/blink/resources/background.png"),
+                layer=DEEP_BACKGROUND,
+                width=25,
+                position=ppb.Vector(-25, 0)
+            ),
+            ["cleanup"]
+        )
+
+        self.main_camera.position = ppb.Vector(-25, 0)
+
+    def on_pre_render(self, event, signal):
+        if self.main_camera.position.x < 0:
+            self.main_camera.position = ppb.Vector(
+                min(
+                    self.main_camera.position.x + CAMERA_SPEED * .016,
+                    0
+                ),
+                0
+            )
+            if self.main_camera.position.x == 0:
+                for sprite in self.get(tag="cleanup"):
+                    self.remove(sprite)
 
     def on_button_pressed(self, event: ppb.events.ButtonPressed, signal):
         if event.button is buttons.Secondary and len(list(self.get(kind=Firefly))) < 25:

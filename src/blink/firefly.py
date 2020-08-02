@@ -63,6 +63,7 @@ class MousePosition(ppb.Sprite):
 class Firefly(ppb.Sprite):
     size = 0.5
     image = animation.Animation("blink/resources/firefly/{0..5}.png", 30)
+    sound = ppb.Sound("blink/resources/firefly_sound.wav")
     urge = 0
     urge_increase = "small_range"
     max_urge = 200
@@ -88,6 +89,7 @@ class Firefly(ppb.Sprite):
         if self.urge >= self.max_urge:
             event.scene.add(Light(position=self.position))
             signal(Blink(self))
+            signal(ppb.events.PlaySound(self.sound))
             self.urge = 0
 
         forces: List[Force] = []
