@@ -74,7 +74,7 @@ class Field(ppb.BaseScene):
 
         self.add(
             ppb.RectangleSprite(
-                image=ppb.Image("src/blink/resources/background.png"),
+                image=ppb.Image("blink/resources/background.png"),
                 layer=DEEP_BACKGROUND,
                 width=25,
                 position=ppb.Vector(-25, 0)

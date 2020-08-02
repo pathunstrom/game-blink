@@ -22,7 +22,7 @@ class Title(ppb.BaseScene):
             position=ppb.Vector(-6, 5.5)
         )
         self.add(title)
-        self.add(ppb.RectangleSprite(image=ppb.Image("src/blink/resources/background.png"), layer=-100, width=25))
+        self.add(ppb.RectangleSprite(image=ppb.Image("blink/resources/background.png"), layer=-100, width=25))
 
     def on_scene_started(self, event, signal):
         signal(QueueBackgroundMusic(bgm_intro))
